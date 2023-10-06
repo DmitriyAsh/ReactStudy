@@ -4,7 +4,7 @@ const MySelect = ({ options, defaultValue, value, onChange }) => {
     return (
         <select
             value={value}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => onChange(event.target.value)} //Здесь в ф-цию onChange передаем не эвент, а сразу значение, которое выбрал пользователь
         >
             <option disabled value=''>
                 {defaultValue}

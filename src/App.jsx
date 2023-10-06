@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import Counter from "./components/counter";
 import "./styles/App.css";
 import PostItem from "./components/PostItem";
@@ -16,12 +16,28 @@ function App() {
         { id: 3, title: "C++", body: "222" },
     ]);
 
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedSort, setSelectedSort] = useState("");
+    const [searchQuery, setSearchQuery] = useState(""); // Состояние для инпута поиска
+    const [selectedSort, setSelectedSort] = useState(""); // Состояние для селекта, чтобы сортировать посты
 
-    // const [post, setPost] = useState({ title: "", body: "" });
+    // useMemo первым парамертом принимает коллбек, а вторым массив зависимостей. Коллбек должен возвращать результат каких-то вычислений,
+    // в массив зависимостей можно передавать какие-то переменные, поля объекта итд. useMemo производит вычисления, в данном случае сортируем массив, запоминает результат вычислений
+    // и кэширует, на каждую перерисовку компонента она не пересчитывает заново, не сортирует массив вновь, а достает отсартированный массив из кэша, но каждый раз, когда какая-то
+    // из зависимостей изменилась, например выбрали другой алгоритм сортировки, то ф-ция вновь пересчитывает и кэширует результат выполнения до тех пор пока опять одна из зависимотей
+    // не изменится, если массив зависимостей пустой, то ф-ция отработает один раз, запомнит результат и больше вызвана не будет
+    const sortedPosts = useMemo(() => {
+        if (selectedSort) {
+            return [...posts].sort((a, b) =>
+                a[selectedSort].localeCompare(b[selectedSort])
+            );
+        }
+        return posts;
+    }, [selectedSort, posts]);
 
-    // const bodyInputRef = useRef(); Используем хук useRef, чтобы получить данные из неуправляемого инпута, получая доступ к дом-элементу, useRef создает сслыку
+    const sortedAndSearchedPosts = useMemo(() => {
+        return sortedPosts.filter((post) =>
+            post.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [searchQuery, sortedPosts]);
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost]);
@@ -34,9 +50,6 @@ function App() {
 
     const sortPosts = (sort) => {
         setSelectedSort(sort);
-        setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort]))); // Ф-ция sort не возвращает новый отсартированный массив, а мутирует старый, состояние напрямую изменять нельзя
-        // поэтому разварачиваем посты в новый массив и сортируем его (мутируем копию массива и не мутируем состояние напрямую), sort принимаем коллбек, который аргументами принимает 2
-        // элемента массива, берем поле, которое выбрал пользователь (title или body), и сравнимаем поле из объекта а с полем из объекта b
     };
 
     return (
@@ -59,10 +72,10 @@ function App() {
                     ]}
                 />
             </div>
-            {posts.length !== 0 ? (
+            {sortedAndSearchedPosts.length !== 0 ? (
                 <PostList
                     remove={removePost}
-                    posts={posts}
+                    posts={sortedAndSearchedPosts}
                     title={"Posts about JS"}
                 />
             ) : (
