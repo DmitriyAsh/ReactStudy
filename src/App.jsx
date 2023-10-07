@@ -7,6 +7,7 @@ import MyButton from "./components/UI/button/MyButton";
 import MyInput from "./components/UI/input/MyInput";
 import PostForm from "./components/PostForm";
 import MySelect from "./components/UI/select/MySelect";
+import PostFilter from "./components/PostFilter";
 
 function App() {
     // useState возвращает массив из 2х объектов, первый это само состояние (posts), второй- функция, которое это состояние изменятет (setPosts)
@@ -16,8 +17,7 @@ function App() {
         { id: 3, title: "C++", body: "222" },
     ]);
 
-    const [searchQuery, setSearchQuery] = useState(""); // Состояние для инпута поиска
-    const [selectedSort, setSelectedSort] = useState(""); // Состояние для селекта, чтобы сортировать посты
+    const [filter, setFilter] = useState({ sort: "", query: "" }); // Состояние для компонента PostFilter
 
     // useMemo первым парамертом принимает коллбек, а вторым массив зависимостей. Коллбек должен возвращать результат каких-то вычислений,
     // в массив зависимостей можно передавать какие-то переменные, поля объекта итд. useMemo производит вычисления, в данном случае сортируем массив, запоминает результат вычислений
@@ -25,19 +25,19 @@ function App() {
     // из зависимостей изменилась, например выбрали другой алгоритм сортировки, то ф-ция вновь пересчитывает и кэширует результат выполнения до тех пор пока опять одна из зависимотей
     // не изменится, если массив зависимостей пустой, то ф-ция отработает один раз, запомнит результат и больше вызвана не будет
     const sortedPosts = useMemo(() => {
-        if (selectedSort) {
+        if (filter.sort) {
             return [...posts].sort((a, b) =>
-                a[selectedSort].localeCompare(b[selectedSort])
+                a[filter.sort].localeCompare(b[filter.sort])
             );
         }
         return posts;
-    }, [selectedSort, posts]);
+    }, [filter.sort, posts]);
 
     const sortedAndSearchedPosts = useMemo(() => {
         return sortedPosts.filter((post) =>
-            post.title.toLowerCase().includes(searchQuery.toLowerCase())
+            post.title.toLowerCase().includes(filter.query.toLowerCase())
         );
-    }, [searchQuery, sortedPosts]);
+    }, [filter.query, sortedPosts]);
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost]);
@@ -48,30 +48,11 @@ function App() {
         setPosts(posts.filter((p) => p.id !== post.id));
     };
 
-    const sortPosts = (sort) => {
-        setSelectedSort(sort);
-    };
-
     return (
         <div className='App'>
             <PostForm create={createPost} />
             <hr style={{ margin: "15px 0" }} />
-            <div>
-                <MyInput
-                    placeholder='Search...'
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <MySelect
-                    value={selectedSort}
-                    onChange={sortPosts}
-                    defaultValue='Sort By'
-                    options={[
-                        { value: "title", name: "By Name" },
-                        { value: "body", name: "By Description" },
-                    ]}
-                />
-            </div>
+            <PostFilter filter={filter} setFilter={setFilter} />
             {sortedAndSearchedPosts.length !== 0 ? (
                 <PostList
                     remove={removePost}
