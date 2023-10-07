@@ -8,6 +8,7 @@ import MyInput from "./components/UI/input/MyInput";
 import PostForm from "./components/PostForm";
 import MySelect from "./components/UI/select/MySelect";
 import PostFilter from "./components/PostFilter";
+import MyModal from "./components/UI/myModal/MyModal";
 
 function App() {
     // useState возвращает массив из 2х объектов, первый это само состояние (posts), второй- функция, которое это состояние изменятет (setPosts)
@@ -17,6 +18,7 @@ function App() {
         { id: 3, title: "C++", body: "222" },
     ]);
 
+    const [modal, setModal] = useState(false); // Состояния для модального окна, отвечающиего за его видимость
     const [filter, setFilter] = useState({ sort: "", query: "" }); // Состояние для компонента PostFilter
 
     // useMemo первым парамертом принимает коллбек, а вторым массив зависимостей. Коллбек должен возвращать результат каких-то вычислений,
@@ -41,6 +43,7 @@ function App() {
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost]);
+        setModal(false);
     };
 
     // Получаем пост из дочернего компонента
@@ -50,7 +53,12 @@ function App() {
 
     return (
         <div className='App'>
-            <PostForm create={createPost} />
+            <MyButton style={{ marginTop: 15 }} onClick={() => setModal(true)}>
+                Create Post
+            </MyButton>
+            <MyModal visible={modal} setVisible={setModal}>
+                <PostForm create={createPost} />
+            </MyModal>
             <hr style={{ margin: "15px 0" }} />
             <PostFilter filter={filter} setFilter={setFilter} />
             <PostList
