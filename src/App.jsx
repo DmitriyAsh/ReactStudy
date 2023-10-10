@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Counter from "./components/counter";
 import "./styles/App.css";
 import PostItem from "./components/PostItem";
@@ -10,14 +10,11 @@ import MySelect from "./components/UI/select/MySelect";
 import PostFilter from "./components/PostFilter";
 import MyModal from "./components/UI/myModal/MyModal";
 import { usePosts } from "./hooks/usePosts";
+import axios from "axios";
 
 function App() {
     // useState возвращает массив из 2х объектов, первый это само состояние (posts), второй- функция, которое это состояние изменятет (setPosts)
-    const [posts, setPosts] = useState([
-        { id: 1, title: "JavaScript", body: "111" },
-        { id: 2, title: "Phyton", body: "333" },
-        { id: 3, title: "C++", body: "222" },
-    ]);
+    const [posts, setPosts] = useState([]);
 
     const [modal, setModal] = useState(false); // Состояния для модального окна, отвечающиего за его видимость
     const [filter, setFilter] = useState({ sort: "", query: "" }); // Состояние для компонента PostFilter
@@ -32,6 +29,17 @@ function App() {
     const removePost = (post) => {
         setPosts(posts.filter((p) => p.id !== post.id));
     };
+
+    async function fetchPosts() {
+        const response = await axios.get(
+            "https://jsonplaceholder.typicode.com/posts"
+        );
+        setPosts(response.data);
+    }
+
+    useEffect(() => {
+        fetchPosts();
+    }, []);
 
     return (
         <div className='App'>
