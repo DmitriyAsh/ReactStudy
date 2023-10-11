@@ -11,6 +11,8 @@ import PostFilter from "./components/PostFilter";
 import MyModal from "./components/UI/myModal/MyModal";
 import { usePosts } from "./hooks/usePosts";
 import axios from "axios";
+import PostService from "./API/PostService";
+import Loader from "./components/UI/loader/Loader";
 
 function App() {
     // useState возвращает массив из 2х объектов, первый это само состояние (posts), второй- функция, которое это состояние изменятет (setPosts)
@@ -19,6 +21,7 @@ function App() {
     const [modal, setModal] = useState(false); // Состояния для модального окна, отвечающиего за его видимость
     const [filter, setFilter] = useState({ sort: "", query: "" }); // Состояние для компонента PostFilter
     const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
+    const [isPostsLoading, setIsPostsLoading] = useState(false);
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost]);
@@ -31,10 +34,12 @@ function App() {
     };
 
     async function fetchPosts() {
-        const response = await axios.get(
-            "https://jsonplaceholder.typicode.com/posts"
-        );
-        setPosts(response.data);
+        setIsPostsLoading(true);
+        setTimeout(async () => {
+            const posts = await PostService.getAll();
+            setPosts(posts);
+            setIsPostsLoading(false);
+        }, 1000);
     }
 
     useEffect(() => {
@@ -51,11 +56,23 @@ function App() {
             </MyModal>
             <hr style={{ margin: "15px 0" }} />
             <PostFilter filter={filter} setFilter={setFilter} />
-            <PostList
-                remove={removePost}
-                posts={sortedAndSearchedPosts}
-                title={"Posts about JS"}
-            />
+            {isPostsLoading ? (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: 50,
+                    }}
+                >
+                    <Loader />
+                </div>
+            ) : (
+                <PostList
+                    remove={removePost}
+                    posts={sortedAndSearchedPosts}
+                    title={"Posts about JS"}
+                />
+            )}
         </div>
     );
 }
