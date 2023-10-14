@@ -28,12 +28,14 @@ function App() {
     const [limit, setLimit] = useState(10);
     const [page, setPage] = useState(1);
     const pagesArray = usePagination(totalPages);
-    const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
-        const response = await PostService.getAll(limit, page);
-        setPosts(response.data);
-        const totalCount = response.headers["x-total-count"];
-        setTotalPages(getPageCount(totalCount, limit));
-    });
+    const [fetchPosts, isPostsLoading, postError] = useFetching(
+        async (limit, page) => {
+            const response = await PostService.getAll(limit, page);
+            setPosts(response.data);
+            const totalCount = response.headers["x-total-count"];
+            setTotalPages(getPageCount(totalCount, limit));
+        }
+    );
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost]);
@@ -46,11 +48,12 @@ function App() {
     };
 
     useEffect(() => {
-        fetchPosts();
-    }, [page]);
+        fetchPosts(limit, page);
+    }, []);
 
     const changePage = (page) => {
         setPage(page);
+        fetchPosts(limit, page);
     };
 
     return (
