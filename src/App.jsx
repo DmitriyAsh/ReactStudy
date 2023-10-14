@@ -14,6 +14,8 @@ import axios from "axios";
 import PostService from "./API/PostService";
 import Loader from "./components/UI/loader/Loader";
 import { useFetching } from "./hooks/useFetching";
+import { getPageCount } from "./utils/pages";
+import { usePagination } from "./hooks/usePagination";
 
 function App() {
     // useState возвращает массив из 2х объектов, первый это само состояние (posts), второй- функция, которое это состояние изменятет (setPosts)
@@ -22,9 +24,15 @@ function App() {
     const [modal, setModal] = useState(false); // Состояния для модального окна, отвечающиего за его видимость
     const [filter, setFilter] = useState({ sort: "", query: "" }); // Состояние для компонента PostFilter
     const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
+    const [totalPages, setTotalPages] = useState(0);
+    const [limit, setLimit] = useState(10);
+    const [page, setPage] = useState(1);
+    const pagesArray = usePagination(totalPages);
     const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
-        const posts = await PostService.getAll();
-        setPosts(posts);
+        const response = await PostService.getAll(limit, page);
+        setPosts(response.data);
+        const totalCount = response.headers["x-total-count"];
+        setTotalPages(getPageCount(totalCount, limit));
     });
 
     const createPost = (newPost) => {
@@ -39,7 +47,11 @@ function App() {
 
     useEffect(() => {
         fetchPosts();
-    }, []);
+    }, [page]);
+
+    const changePage = (page) => {
+        setPage(page);
+    };
 
     return (
         <div className='App'>
@@ -69,6 +81,17 @@ function App() {
                     title={"Posts about JS"}
                 />
             )}
+            <div className='page__wrapper'>
+                {pagesArray.map((p) => (
+                    <span
+                        onClick={() => changePage(p)}
+                        key={p}
+                        className={page === p ? "page page__current" : "page"}
+                    >
+                        {p}
+                    </span>
+                ))}
+            </div>
         </div>
     );
 }
