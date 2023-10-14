@@ -16,6 +16,7 @@ import Loader from "./components/UI/loader/Loader";
 import { useFetching } from "./hooks/useFetching";
 import { getPageCount } from "./utils/pages";
 import { usePagination } from "./hooks/usePagination";
+import Pagination from "./components/UI/pagination/Pagination";
 
 function App() {
     // useState возвращает массив из 2х объектов, первый это само состояние (posts), второй- функция, которое это состояние изменятет (setPosts)
@@ -27,7 +28,6 @@ function App() {
     const [totalPages, setTotalPages] = useState(0);
     const [limit, setLimit] = useState(10);
     const [page, setPage] = useState(1);
-    const pagesArray = usePagination(totalPages);
     const [fetchPosts, isPostsLoading, postError] = useFetching(
         async (limit, page) => {
             const response = await PostService.getAll(limit, page);
@@ -84,17 +84,11 @@ function App() {
                     title={"Posts about JS"}
                 />
             )}
-            <div className='page__wrapper'>
-                {pagesArray.map((p) => (
-                    <span
-                        onClick={() => changePage(p)}
-                        key={p}
-                        className={page === p ? "page page__current" : "page"}
-                    >
-                        {p}
-                    </span>
-                ))}
-            </div>
+            <Pagination
+                page={page}
+                changePage={changePage}
+                totalPages={totalPages}
+            />
         </div>
     );
 }
