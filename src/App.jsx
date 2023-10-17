@@ -1,21 +1,14 @@
 import React from "react";
 import "./styles/App.css";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import About from "./pages/About";
-import Posts from "./pages/Posts";
 import Navbar from "./components/UI/navbar/Navbar";
-import Error from "./pages/Error";
+import AppRouter from "./components/AppRouter";
 
 function App() {
     return (
         <BrowserRouter>
             <Navbar />
-            <Routes>
-                <Route path='/error' element={<Error />} />
-                <Route path='/about' element={<About />} />
-                <Route path='/posts' element={<Posts />} />
-                <Route path='/*' element={<Navigate to='/error' replace />} />
-            </Routes>
+            <AppRouter />
         </BrowserRouter>
         // 1. Вместо switch теперь необходимо использовать Routes;
         // 2. useHistory убрали в router-dom v6 и заменили на useNavige, в котором по умолчанию исп-ся push
