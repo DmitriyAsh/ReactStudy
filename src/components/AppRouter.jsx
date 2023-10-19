@@ -9,7 +9,7 @@ const AppRouter = () => {
     return (
         <Routes>
             <Route path='/posts/:id' element={<PostIdPage />} />
-            <Route path='/' element={<About />} />
+            <Route path='/' element={<Posts />} />
             <Route path='/error' element={<Error />} />
             <Route path='/about' element={<About />} />
             <Route path='/posts' element={<Posts />} />
